@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "webpack",
+    "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -30,12 +30,16 @@
     "babel-preset-react": "6.3.13",
     "babel-preset-react-hmre": "1.0.1",
     "babel-preset-stage-2": "6.3.13",
+    "babel-runtime": "6.3.19",
     "cross-env": "1.0.7",
+    "eventsource-polyfill": "0.9.6",
+    "express": "4.13.4",
     "webpack": "1.12.12",
     "webpack-dev-middleware": "1.5.1",
     "webpack-hot-middleware": "2.6.0"
   },
   "dependencies": {
+    "jade": "1.11.0",
     "react": "0.14.6",
     "react-dom": "0.14.6",
     "redux": "3.0.5"

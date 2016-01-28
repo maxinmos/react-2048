@@ -1,28 +1,39 @@
+var path = require('path');
+var webpack = require('webpack');
+
 module.exports = {
-	// devtool: 'cheap-module-eval-source-map',
-	entry: __dirname + '/app/index.js',
+  devtool: 'cheap-module-eval-source-map',
+	entry: [
+    'eventsource-polyfill',
+    'webpack-hot-middleware/client',
+    './src/index',
+  ],
 	output: {
-		path: __dirname + '/public',
-		// publicPath: '/assets',
-		filename: 'bundle.js',
+		path: path.join(__dirname, 'dist'),
+    filename: 'app.js',
+		publicPath: '/static/',
 		libraryTarget: 'umd'
 	},
-	externals: [
-		{
-			react: {
-				commonjs: 'react',
-				amd: 'react',
-				root: 'React'
-			}
-		}
-	],
+	// externals: [
+		// {
+		// 	react: {
+		// 		commonjs: 'react',
+		// 		amd: 'react',
+		// 		root: 'React'
+		// 	}
+		// }
+	// ],
 	module: {
 		loaders: [
 			{
 				test: /\.jsx?$/,
 				exclude: /node_module/,
-				loader: 'babel?cacheDirectory'
+				loader: 'babel',
 			}
 		]
-	}
+	},
+	plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    new webpack.NoErrorsPlugin()
+	]
 }
