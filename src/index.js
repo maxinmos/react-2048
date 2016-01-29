@@ -1,16 +1,18 @@
 import React from 'react';
-import { render } from 'react-dom';
+import {render} from 'react-dom';
 
 boot();
 
 function boot () {
-    let { Pure } = require('./pure')
-    render(<Pure />, document.getElementById('app'));
+    let App = require('./App').default;
+    render(<App />, document.getElementById('app'));
 }
 
-if (module.hot) {
-    // Enable Webpack hot module replacement for pure
-  module.hot.accept('./pure', () => {
-    boot();
-  });
+if (process.env.NODE_ENV !== 'production') {
+  if (module.hot) {
+      // Enable Webpack hot module replacement for pure
+    module.hot.accept('./App', () => {
+      boot();
+    });
+  }
 }
