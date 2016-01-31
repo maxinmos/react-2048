@@ -19,8 +19,18 @@ module.exports = {
         test: /\.jsx?$/,
         exclude: /node_module/,
         loader: 'babel',
+      },
+      {
+        test: /\.css$/,
+        loader: 'style!css?importLoaders=1&modules!postcss'
       }
     ]
+  },
+  postcss: function () {
+    return [
+        require('autoprefixer'),
+        require('precss'),
+      ];
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
