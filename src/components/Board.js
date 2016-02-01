@@ -10,9 +10,11 @@ export default React.createClass({
     let { board } = this.props;
     return (
       <div ref="board">
-        {board.get('cells').map((cell) =>(
-          <Cell {...cell.toJS()}/>
-          ))}
+        <div ref={(container) => this._container = container}>
+          {board.get('cells').map((cell) =>(
+            <Cell {...cell.toJS()}/>
+            ))}
+        </div>
         <Grid
           width={board.get('width')}
           height={board.get('height')}/>

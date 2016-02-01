@@ -9,20 +9,36 @@ import {
 } from '../constants.js';
 
 let initialState = Immutable.Map({
+  width: GRID_WIDTH,
+  height: GRID_HEIGHT,
+  size: GRID_WIDTH * GRID_HEIGHT,
   cells: Immutable.List()
 });
+
+function refreshState (width = GRID_WIDTH, height = GRID_HEIGHT) {
+  return Immutable.Map({
+    width,
+    height,
+    size: width * height,
+    cells: Immutable.List()
+  });
+}
 
 export default (state, action) => {
   switch (action.type) {
     case 'NEW_GAME':
       let {
-        height = GRID_HEIGHT,
-        width = GRID_WIDTH,
+        height,
+        width,
       } = action.payload;
-      return state.merge({ width, height });
+
+      state = refreshState();
+      return state.merge({
+        cells: randomCells(state)
+      });
 
     default:
-      return state || initialState;
+      return state || refreshState();
   }
 };
 
@@ -31,38 +47,14 @@ function randomNumber (max = 3) {
   return 8 * Math.pow(2, random);
 }
 
-export function createGrid (height, width) {
-  let grid = Immutable.List();
-  _times(height, (y) => {
-    let cols = Immutable.List();
-    _times(width, (x) => {
-      cols = cols.set(x, Immutable.Map({
-        x: x,
-        y: y,
-      }));
-    });
-    grid = grid.set(y, cols);
-  });
-
-  return grid;
-}
-
-function emptyCells (grid) {
-  return grid
-    .flatten(1)
-    .map(({ value }, index) => !value && index)
-    .filter(value => value !== false);
-}
-
-function emptyIndexs (grid, n) {
-  let indexs = emptyCells(grid);
+function emptyIndexs ({ size, cells = Immutable.List() }, n) {
+  let existingCells = cells.toJS().map(({ index }) => index);
   let results = [];
 
   while (n > 0) {
-    let random = Math.floor(Math.random() * indexs.size);
-    let value = indexs.get(random);
-    if (!~results.indexOf(value)) {
-      results.push(value);
+    let random = Math.floor(Math.random() * size);
+    if (!~[].concat(results, existingCells).indexOf(random)) {
+      results.push(random);
       n--;
     }
   }
@@ -70,16 +62,24 @@ function emptyIndexs (grid, n) {
   return results;
 }
 
-export function randomCell (grid, n = 3) {
-  let width = grid.get(0).size;
-  let empty = emptyIndexs(grid, n);
+function randomCells (state, n = 3) {
+  let {
+    width,
+    size,
+    cells
+  } = state.toObject();
 
-  _forEach(empty, function (index) {
-    let y = Math.floor(index / width);
-    let x = index % width;
-    let value = randomNumber();
-    grid = grid.mergeIn([y, x], {value})
-  });
+  let newCells = emptyIndexs({ size, cells }, n)
+    .map((index) => {
+      let y = Math.floor(index / width);
+      let x = index % width;
+      return Immutable.Map({
+        y,
+        x,
+        index,
+        value: randomNumber()
+      });
+    });
 
-  return grid;
+  return cells.concat(newCells);
 }

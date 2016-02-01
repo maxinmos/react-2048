@@ -16,6 +16,7 @@ let Game = React.createClass({
       board,
       newGame
     } = this.props;
+    console.log(board.toJS());
     return (
       <div>
         <button onClick={() => newGame()}>New game</button>
