@@ -2,8 +2,7 @@ import React, {Component} from 'react';
 import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 import actionCreators from '../actions/actionCreators.js';
-import Grid from './Grid.js';
-import style from './style.css';
+import Board from './Board.js';
 
 let Game = React.createClass({
   componentDidMount: function () {
@@ -14,14 +13,14 @@ let Game = React.createClass({
   },
   render: function () {
     let {
-      grid,
+      board,
       newGame
     } = this.props;
     return (
       <div>
         <button onClick={() => newGame()}>New game</button>
         <button>Save</button>
-        <Grid grid={grid}/>
+        <Board board={board}/>
       </div>
       )
   }

@@ -1,24 +1,13 @@
 import React from 'react';
+import _times from 'lodash/times';
 import Cell from './Cell.js';
 
-export default React.createClass({
-  componentDidMount() {
-    let {grid} = this.refs;
-    grid.addEventListener('touchmove', function () {
-    })
-  },
-  render () {
-    let {grid} = this.props
-    return (
-      <div ref="grid">
-      {grid.map((cells, y) => (
-        <div key={y}>
-          {cells.map((cell, x) =>
-            <Cell key={x} {...cell.toJS()}/>
-            )}
-        </div>
-        ))}
+export default ({ width, height }) => (
+  <div className="grid">
+    {_times(height, (y) => (
+      <div key={y}>
+        {_times(width, (x) => <Cell key={x}/>)}
       </div>
-      )
-  }
-})
+      ))}
+  </div>
+  )

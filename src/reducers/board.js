@@ -8,17 +8,21 @@ import {
   GRID_HEIGHT
 } from '../constants.js';
 
-export default (state = createGrid(GRID_HEIGHT, GRID_WIDTH), action) => {
+let initialState = Immutable.Map({
+  cells: Immutable.List()
+});
+
+export default (state, action) => {
   switch (action.type) {
     case 'NEW_GAME':
       let {
         height = GRID_HEIGHT,
         width = GRID_WIDTH,
       } = action.payload;
-      return randomCell(createGrid(height, width));
+      return state.merge({ width, height });
 
     default:
-      return state;
+      return state || initialState;
   }
 };
 
