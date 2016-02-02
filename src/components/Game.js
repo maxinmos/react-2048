@@ -3,6 +3,7 @@ import {bindActionCreators} from 'redux';
 import {connect} from 'react-redux';
 import actionCreators from '../actions/actionCreators.js';
 import Board from './Board.js';
+import style from './Game.css';
 
 let Game = React.createClass({
   componentDidMount: function () {
@@ -16,11 +17,12 @@ let Game = React.createClass({
       board,
       newGame
     } = this.props;
-    console.log(board.toJS());
     return (
-      <div>
-        <button onClick={() => newGame()}>New game</button>
-        <button>Save</button>
+      <div className={style.game}>
+        <div className={style.actions}>
+          <button onClick={() => newGame()}>New game</button>
+          <button>Save</button>
+        </div>
         <Board board={board}/>
       </div>
       )

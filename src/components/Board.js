@@ -1,6 +1,7 @@
 import React from 'react';
 import Grid from './Grid.js';
-import Cell from './Cell.js';
+import TransitionCell from './TransitionCell.js';
+import style from './Board.css';
 
 export default React.createClass({
   componentDidMount() {
@@ -9,10 +10,11 @@ export default React.createClass({
   render () {
     let { board } = this.props;
     return (
-      <div ref="board">
-        <div ref={(container) => this._container = container}>
-          {board.get('cells').map((cell) =>(
-            <Cell {...cell.toJS()}/>
+      <div className={style.board} ref="board">
+        <div className={style.layer}
+          ref={(container) => this._container = container}>
+          {board.get('cells').map((cell, i) => (
+            <TransitionCell key={i} {...cell.toJS()}/>
             ))}
         </div>
         <Grid

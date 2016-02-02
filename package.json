@@ -47,6 +47,7 @@
     "webpack-hot-middleware": "2.6.0"
   },
   "dependencies": {
+    "classnames": "2.2.3",
     "immutable": "3.7.6",
     "jade": "1.11.0",
     "react": "0.14.6",
