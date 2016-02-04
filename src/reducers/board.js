@@ -3,6 +3,7 @@ import _times from 'lodash/times';
 import _random from 'lodash/random';
 import _forEach from 'lodash/forEach';
 import _compact from 'lodash/compact';
+import _reject from 'lodash/reject';
 import {
   GRID_WIDTH,
   GRID_HEIGHT
@@ -82,4 +83,31 @@ function randomCells (state, n = 3) {
     });
 
   return cells.concat(newCells);
+}
+
+function availableCell (cells, axis, value) {
+  var cell = cells.find(function (cell) {
+    return cell.get('x') === axis.x && cell.get('y') === axis.y;
+  });
+
+  return cell
+    ? cell.get('value') === value
+    : true;
+}
+
+function opposite (axis) {
+  var base = ['x', 'y'];
+  return _reject(base, axis)[0];
+}
+
+// Direction
+// Left: { x: 1 }
+// Right: { x: -1 }
+// Up: { y: 1 }
+// Down: { y: -1 }
+function move (state, direction) {
+  let { width, height, cells } = state.toObject();
+  let axis = Object.keys(direction)[0];
+  cells = cells
+    .sortBy((cell) => cell.get(axis) * direction[axis]);
 }
