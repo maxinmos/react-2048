@@ -108,6 +108,30 @@ function opposite (axis) {
 function move (state, direction) {
   let { width, height, cells } = state.toObject();
   let axis = Object.keys(direction)[0];
+  let sixa = opposite(axis);
+  let temp = cells;
   cells = cells
-    .sortBy((cell) => cell.get(axis) * direction[axis]);
+    .sortBy((cell) => cell.get(axis) * direction[axis])
+    .map((cell, index) => {
+      let available;
+      cell = cell.toObject();
+
+      // left:
+      for (let i = cell[axis] - 1; i >= 0; i -= direction[axis]) {
+        let check = availableCell(temp, {
+          [axis]: i,
+          [sixa]: cell[sixa]
+        }, value);
+        if (!check) break;
+        available = check;
+      }
+
+      // if (available) {
+      //   let { x, y, value } = available.toObject();
+      //   temp = temp.setIn(index, (cell) => {
+      //     if (cell.value)
+      //     cell
+      //   })
+      // }
+    });
 }
