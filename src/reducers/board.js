@@ -3,7 +3,7 @@ import _times from 'lodash/times';
 import _random from 'lodash/random';
 import _forEach from 'lodash/forEach';
 import _compact from 'lodash/compact';
-import _reject from 'lodash/reject';
+import _without from 'lodash/without';
 import {
   GRID_WIDTH,
   GRID_HEIGHT
@@ -38,12 +38,15 @@ export default (state, action) => {
         cells: randomCells(state)
       });
 
+    case 'LEFT':
+      return move(state, { x: 1 });
+
     default:
       return state || refreshState();
   }
 };
 
-function randomNumber (max = 3) {
+function randomNumber (max = 2) {
   let random = Math.floor(Math.random() * max);
   return 8 * Math.pow(2, random);
 }
@@ -63,7 +66,7 @@ function emptyIndexs ({ size, cells = Immutable.List() }, n) {
   return results;
 }
 
-function randomCells (state, n = 3) {
+function randomCells (state, n = 7) {
   let {
     width,
     size,
@@ -85,19 +88,30 @@ function randomCells (state, n = 3) {
   return cells.concat(newCells);
 }
 
-function availableCell (cells, axis, value) {
-  var cell = cells.find(function (cell) {
-    return cell.get('x') === axis.x && cell.get('y') === axis.y;
+function indexInCells (cells, coordinates) {
+  let { x, y } = coordinates;
+  return cells.findIndex(function (cell) {
+    return cell.get('x') === x && cell.get('y') === y;
   });
+}
 
-  return cell
-    ? cell.get('value') === value
-    : true;
+function availableCell (cells, coordinates) {
+  let cell;
+  let { value } = coordinates;
+  let index = indexInCells(cells, coordinates);
+  if (~index) {
+    cell = cells.get(index);
+  }
+  return {
+    ...coordinates,
+    index,
+    has: cell ? value === cell.get('value') : true,
+  };
 }
 
 function opposite (axis) {
   var base = ['x', 'y'];
-  return _reject(base, axis)[0];
+  return _without(base, axis)[0];
 }
 
 // Direction
@@ -112,26 +126,38 @@ function move (state, direction) {
   let temp = cells;
   cells = cells
     .sortBy((cell) => cell.get(axis) * direction[axis])
-    .map((cell, index) => {
-      let available;
-      cell = cell.toObject();
+    .map((cell) => {
+      let oCell = cell.toObject();
+      let {
+        [axis]: one,
+        [sixa]: eno,
+        value
+      } = oCell;
 
       // left:
-      for (let i = cell[axis] - 1; i >= 0; i -= direction[axis]) {
-        let check = availableCell(temp, {
+      let available;
+      for (let i = one - 1; i >= 0; i -= direction[axis]) {
+        let coordinates = {
           [axis]: i,
-          [sixa]: cell[sixa]
-        }, value);
-        if (!check) break;
-        available = check;
+          [sixa]: eno,
+          value
+        };
+        let find = availableCell(temp, coordinates);
+        if (!find.has) break;
+        available = find;
       }
 
-      // if (available) {
-      //   let { x, y, value } = available.toObject();
-      //   temp = temp.setIn(index, (cell) => {
-      //     if (cell.value)
-      //     cell
-      //   })
-      // }
+      if (available) {
+        let { x, y, index, value } = available;
+
+        cell = cell.set('to', { x, y });
+        temp = temp.delete(index);
+        temp = temp.update(
+          indexInCells(temp, oCell),
+          (cell) => Immutable.Map({ x, y, value: ~index ? value * 2 : value }));
+      }
+
+      return cell;
     });
+  return state;
 }

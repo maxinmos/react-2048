@@ -1,18 +1,25 @@
 import React from 'react';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
 import Grid from './Grid.js';
 import TransitionCell from './TransitionCell.js';
+import actionCreators from '../actions/actionCreators.js'
 import style from './Board.css';
 
-export default React.createClass({
+let Board = React.createClass({
   componentDidMount() {
+    let { move } = this.props;
+    this.refs.board.addEventListener('touchstart', function () {
+      console.log('touch');
+      move('LEFT');
+    });
   },
 
   render () {
     let { board } = this.props;
     return (
       <div className={style.board} ref="board">
-        <div className={style.layer}
-          ref={(container) => this._container = container}>
+        <div className={style.layer}>
           {board.get('cells').map((cell, i) => (
             <TransitionCell key={i} {...cell.toJS()}/>
             ))}
@@ -23,4 +30,9 @@ export default React.createClass({
       </div>
       )
   }
-})
+});
+
+export default connect(
+  (state) => state,
+  (dispatch) => bindActionCreators(actionCreators, dispatch)
+  )(Board);

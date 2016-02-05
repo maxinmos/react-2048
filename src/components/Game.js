@@ -8,9 +8,13 @@ import style from './Game.css';
 let Game = React.createClass({
   componentDidMount: function () {
     let {
-      newGame
+      newGame,
+      move
     } = this.props;
     newGame();
+    setTimeout(function () {
+      move('LEFT');
+    });
   },
   render: function () {
     let {
