@@ -1,0 +1,65 @@
+$cell-0: #006064;
+$cell-1: #FFD54F;
+$cell-2: #FFC107;
+$cell-3: #FFA000;
+$cell-4: #FFB74D;
+$cell-5: #FF9800;
+$cell-6: #EF6C00;
+$cell-7: #FF8A65;
+$cell-8: #FF5722;
+$cell-9: #E64A19;
+
+.cell {
+	display: inline-block;
+	margin: 4px;
+}
+
+.outer {
+	width: 40px;
+	height: 40px;
+	text-align: center;
+	overflow: hidden;
+	border-radius: 4px;
+	border: 1px solid white;
+}
+
+.inner {
+	display: inline-block;
+	margin-top: 50%;
+	font-weight: bold;
+	color: white;
+	transform: translateY(-50%);
+}
+
+:global {
+	.color-0 {
+		background-color: $cell-0;
+	}
+	.color-1 {
+		background-color: $cell-1;
+	}
+	.color-2 {
+		background-color: $cell-2;
+	}
+	.color-3 {
+		background-color: $cell-3;
+	}
+	.color-4 {
+		background-color: $cell-4;
+	}
+	.color-5 {
+		background-color: $cell-5;
+	}
+	.color-6 {
+		background-color: $cell-6;
+	}
+	.color-7 {
+		background-color: $cell-7;
+	}
+	.color-8 {
+		background-color: $cell-8;
+	}
+	.color-9 {
+		background-color: $cell-9;
+	}
+}
