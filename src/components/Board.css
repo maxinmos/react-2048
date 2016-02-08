@@ -5,4 +5,12 @@
 }
 .layer {
 	position: relative;
+	:global {
+		.cells-enter {
+
+		}
+		.cells-enter.cells-enter-active .cell {
+			transition: all 300ms linear;
+		}
+	}
 }

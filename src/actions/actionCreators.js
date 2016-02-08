@@ -7,7 +7,13 @@ export default {
   },
   move: function (direction) {
     return {
-      type: direction
+      type: 'MOVE',
+      payload: direction
     };
+  },
+  merge: function () {
+    return {
+      type: 'MERGE'
+    }
   }
 }

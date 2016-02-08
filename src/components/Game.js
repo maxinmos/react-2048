@@ -12,9 +12,6 @@ let Game = React.createClass({
       move
     } = this.props;
     newGame();
-    setTimeout(function () {
-      move('LEFT');
-    });
   },
   render: function () {
     let {

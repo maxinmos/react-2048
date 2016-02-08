@@ -1,20 +1,13 @@
 import Immutable from 'immutable';
-import _times from 'lodash/times';
-import _random from 'lodash/random';
 import _forEach from 'lodash/forEach';
-import _compact from 'lodash/compact';
+import _some from 'lodash/some';
+import _range from 'lodash/range';
+import _random from 'lodash/random';
 import _without from 'lodash/without';
 import {
   GRID_WIDTH,
   GRID_HEIGHT
 } from '../constants.js';
-
-let initialState = Immutable.Map({
-  width: GRID_WIDTH,
-  height: GRID_HEIGHT,
-  size: GRID_WIDTH * GRID_HEIGHT,
-  cells: Immutable.List()
-});
 
 function refreshState (width = GRID_WIDTH, height = GRID_HEIGHT) {
   return Immutable.Map({
@@ -34,27 +27,31 @@ export default (state, action) => {
       } = action.payload;
 
       state = refreshState();
-      return state.merge({
-        cells: randomCells(state)
-      });
+      return state.set('cells', randomCells(state));
 
-    case 'LEFT':
-      return move(state, { x: 1 });
+    case 'MERGE':
+      let state = merge(state);
+      return state.set('cells',
+        randomCells(state)
+        );
+
+    case 'MOVE':
+      return move(state, action.payload);
 
     default:
       return state || refreshState();
   }
 };
 
-function randomNumber (max = 2) {
+function randomNumber (max = 1) {
   let random = Math.floor(Math.random() * max);
   return 8 * Math.pow(2, random);
 }
 
-function emptyIndexs ({ size, cells = Immutable.List() }, n) {
-  let existingCells = cells.toJS().map(({ index }) => index);
+function emptyIndexs ({ width, height, size, cells }, n) {
+  let existingCells = cells.toJS().map(({ x, y }) => y * width + x);
   let results = [];
-
+  n = Math.min(n, size - existingCells.length);
   while (n > 0) {
     let random = Math.floor(Math.random() * size);
     if (!~[].concat(results, existingCells).indexOf(random)) {
@@ -66,14 +63,15 @@ function emptyIndexs ({ size, cells = Immutable.List() }, n) {
   return results;
 }
 
-function randomCells (state, n = 7) {
+function randomCells (state, n = 2) {
+  let oState = state.toObject();
   let {
     width,
     size,
     cells
-  } = state.toObject();
+  } = oState;
 
-  let newCells = emptyIndexs({ size, cells }, n)
+  let newCells = emptyIndexs(oState, n)
     .map((index) => {
       let y = Math.floor(index / width);
       let x = index % width;
@@ -109,23 +107,41 @@ function availableCell (cells, coordinates) {
   };
 }
 
+function axisOf (direction) {
+  return Object.keys(direction)[0];
+}
+
 function opposite (axis) {
   var base = ['x', 'y'];
   return _without(base, axis)[0];
 }
 
+function rangeLoop (position, max, direction) {
+  let axis = axisOf(direction);
+  return direction[axis] > 0
+    ? _range(position + 1, max)
+    : _range(position - 1, -1);
+}
+
 // Direction
-// Left: { x: 1 }
-// Right: { x: -1 }
-// Up: { y: 1 }
-// Down: { y: -1 }
+// Left: { x: -1 }
+// Right: { x: 1 }
+// Up: { y: -1 }
+// Down: { y: 1 }
 function move (state, direction) {
-  let { width, height, cells } = state.toObject();
-  let axis = Object.keys(direction)[0];
+  let {
+    width,
+    height,
+    cells
+  } = state.toObject();
+  let axis = axisOf(direction);
   let sixa = opposite(axis);
+  let max = axis === 'x' ? width : height;
   let temp = cells;
+
   cells = cells
-    .sortBy((cell) => cell.get(axis) * direction[axis])
+    .map((cell, index) => cell.set('index', index))
+    .sortBy((cell) => cell.get(axis) * -direction[axis])
     .map((cell) => {
       let oCell = cell.toObject();
       let {
@@ -134,30 +150,71 @@ function move (state, direction) {
         value
       } = oCell;
 
-      // left:
       let available;
-      for (let i = one - 1; i >= 0; i -= direction[axis]) {
+      _some(rangeLoop(one, max, direction), function (i) {
         let coordinates = {
           [axis]: i,
           [sixa]: eno,
           value
         };
         let find = availableCell(temp, coordinates);
-        if (!find.has) break;
+        if (!find.has) return true;
         available = find;
-      }
+      });
 
       if (available) {
         let { x, y, index, value } = available;
-
         cell = cell.set('to', { x, y });
-        temp = temp.delete(index);
-        temp = temp.update(
-          indexInCells(temp, oCell),
-          (cell) => Immutable.Map({ x, y, value: ~index ? value * 2 : value }));
+        temp = temp.delete(indexInCells(temp, oCell));
+        if (~index) {
+          temp = temp.update(
+            indexInCells(temp, available),
+            (cell) => Immutable.Map({ x, y, value: value * 2 }));
+        }
+        else {
+          temp = temp.push(Immutable.Map({ x, y, value }))
+        }
+
       }
 
       return cell;
+    })
+    .sortBy((cell) => cell.get('index'));
+
+  return state
+    .set('cells', cells)
+    .set('transition', true);
+}
+
+function merge (state) {
+  let cells = state.get('cells');
+  cells = cells
+    .map(cell => {
+      let to = cell.get('to');
+      if (to) {
+        cell = cell
+          .delete('to')
+          .merge(to);
+      }
+      return cell;
     });
-  return state;
+
+  cells = cells.reduce((reduction, cell) => {
+      let {
+        x,
+        y,
+        value
+      } = cell.toObject();
+
+      let index = indexInCells(reduction, { x, y });
+      if (~index) {
+        return reduction
+          .update(index, (cell) => cell.set('value', cell.get('value') + value));
+      }
+      return reduction.push(Immutable.Map({ x, y, value }));
+    }, Immutable.List());
+
+  return state
+    .set('cells', cells)
+    .set('transition', false);
 }
