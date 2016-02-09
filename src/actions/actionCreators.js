@@ -15,5 +15,10 @@ export default {
     return {
       type: 'MERGE'
     }
+  },
+  checkWin: function () {
+    return {
+      type: 'CHECK_WIN'
+    }
   }
 }

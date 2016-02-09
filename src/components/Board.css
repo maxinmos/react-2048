@@ -1,9 +1,13 @@
-.board {
-	display: inline-block;
-	padding: 6px;
-	background-color: #CFD8DC;
+.outer {
+	position: relative;
+	width: 200px;
+	padding: 10px;
+	margin: 0 auto;
+	background-color: #ff4062;
+	border-radius: 4px;
 }
-.layer {
+
+.container {
 	position: relative;
 	:global {
 		.cells-enter {

@@ -22,7 +22,6 @@ let Game = React.createClass({
       <div className={style.game}>
         <div className={style.actions}>
           <button onClick={() => newGame()}>New game</button>
-          <button>Save</button>
         </div>
         <Board board={board}/>
       </div>
