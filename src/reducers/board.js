@@ -4,19 +4,11 @@ import _some from 'lodash/some';
 import _range from 'lodash/range';
 import _random from 'lodash/random';
 import _without from 'lodash/without';
+import { generateKey } from '../helpers/index.js';
 import {
   GRID_WIDTH,
   GRID_HEIGHT
 } from '../constants.js';
-
-function refreshState (width = GRID_WIDTH, height = GRID_HEIGHT) {
-  return Immutable.Map({
-    width,
-    height,
-    size: width * height,
-    cells: Immutable.List()
-  });
-}
 
 export default (state, action) => {
   switch (action.type) {
@@ -42,6 +34,16 @@ export default (state, action) => {
       return state || refreshState();
   }
 };
+
+function refreshState (width = GRID_WIDTH, height = GRID_HEIGHT) {
+  return Immutable.Map({
+    width,
+    height,
+    size: width * height,
+    win: false,
+    cells: Immutable.List()
+  });
+}
 
 function randomNumber (max = 1) {
   let random = Math.floor(Math.random() * max);
@@ -79,6 +81,7 @@ function randomCells (state, n = 2) {
         y,
         x,
         index,
+        key: generateKey(),
         value: randomNumber()
       });
     });
@@ -123,11 +126,6 @@ function rangeLoop (position, max, direction) {
     : _range(position - 1, -1);
 }
 
-// Direction
-// Left: { x: -1 }
-// Right: { x: 1 }
-// Up: { y: -1 }
-// Down: { y: 1 }
 function move (state, direction) {
   let {
     width,
@@ -140,7 +138,6 @@ function move (state, direction) {
   let temp = cells;
 
   cells = cells
-    .map((cell, index) => cell.set('index', index))
     .sortBy((cell) => cell.get(axis) * -direction[axis])
     .map((cell) => {
       let oCell = cell.toObject();
@@ -178,8 +175,7 @@ function move (state, direction) {
       }
 
       return cell;
-    })
-    .sortBy((cell) => cell.get('index'));
+    });
 
   return state
     .set('cells', cells)
@@ -197,21 +193,30 @@ function merge (state) {
           .merge(to);
       }
       return cell;
-    });
-
-  cells = cells.reduce((reduction, cell) => {
+    })
+    .reduce((reduction, cell) => {
+      let oCell = cell.toObject();
       let {
         x,
         y,
         value
       } = cell.toObject();
 
-      let index = indexInCells(reduction, { x, y });
+      let index = indexInCells(reduction, oCell);
       if (~index) {
-        return reduction
-          .update(index, (cell) => cell.set('value', cell.get('value') + value));
+        return reduction.update(index,
+            (cell) => cell
+              .set('key', generateKey())
+              .set('value', cell.get('value') + value));
       }
-      return reduction.push(Immutable.Map({ x, y, value }));
+
+      return reduction.push(Immutable.Map({
+        x,
+        y,
+        value,
+        key: generateKey()
+      }));
+
     }, Immutable.List());
 
   return state
