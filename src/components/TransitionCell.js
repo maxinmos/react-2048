@@ -13,9 +13,15 @@ let TransitionCell = React.createClass({
     this.setState({ x, y });
     if (to) {
       setTimeout(() => {
-        this.setState({ x: to.x, y: to.y });
+        if (!this.unmount) {
+          this.setState({ x: to.x, y: to.y });
+        }
       });
     }
+  },
+
+  componentWillUnmount () {
+    this.unmount = true;
   },
 
   render () {

@@ -126,7 +126,7 @@ function rangeLoop (position, max, direction) {
     : _range(position - 1, -1);
 }
 
-function move (state, direction) {
+export function move (state, direction) {
   let {
     width,
     height,
@@ -182,7 +182,7 @@ function move (state, direction) {
     .set('transition', true);
 }
 
-function merge (state) {
+export function merge (state) {
   let cells = state.get('cells');
   cells = cells
     .map(cell => {

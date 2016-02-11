@@ -20,5 +20,10 @@ export default {
     return {
       type: 'CHECK_WIN'
     }
+  },
+  checkLose: function () {
+    return {
+      type: 'CHECK_LOSE'
+    }
   }
 }

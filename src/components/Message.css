@@ -1,4 +1,4 @@
-.win {
+.message {
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -12,9 +12,10 @@
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%, -50%);
-		font-size: 2em;
+		font-size: 1.5em;
 		font-weight: bold;
 		text-transform: uppercase;
 		color: #ff4062;
+		white-space: nowrap;
 	}
 }

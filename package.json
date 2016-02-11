@@ -48,6 +48,7 @@
   },
   "dependencies": {
     "classnames": "2.2.3",
+    "crossvent": "1.5.4",
     "immutable": "3.7.6",
     "jade": "1.11.0",
     "react": "0.14.6",

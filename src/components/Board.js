@@ -1,8 +1,9 @@
 import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import crossvent from 'crossvent';
 import { transitionEnd, getTouches, getDirection } from '../helpers/index.js';
-import Win from './Win.js';
+import Message from './Message.js';
 import Grid from './Grid.js';
 import TransitionCell from './TransitionCell.js';
 import actionCreators from '../actions/actionCreators.js'
@@ -10,17 +11,20 @@ import style from './Board.css';
 
 let Board = React.createClass({
   componentDidMount() {
-    this.refs.board.addEventListener('touchstart', this._touchStart);
+    let {
+      board,
+      container
+    } = this.refs;
 
-    this.refs.board.addEventListener('touchend', this._touchEnd);
-
-    this.refs.container.addEventListener(transitionEnd(), (() => {
+    crossvent.add(board, 'touchstart', this._touchStart, true);
+    crossvent.add(board, 'touchend', this._touchEnd, true);
+    crossvent.add(container, transitionEnd(), (() => {
       let timeout = null;
       return () => {
         clearTimeout(timeout);
         timeout = setTimeout(() => this._transitionEnd());
       };
-    })());
+    })(), true);
   },
 
   render () {
@@ -31,8 +35,7 @@ let Board = React.createClass({
     return (
       <div ref="board">
         <div className={style.outer}>
-          {others.get('win') && <Win/>}
-
+          <Message win={others.get('win')} lose={others.get('lose')}/>
           <div className={style.container} ref="container">
             {board.get('cells').map((cell, i) => (
               <TransitionCell
@@ -55,22 +58,28 @@ let Board = React.createClass({
 
   _touchEnd (e) {
     let {
+      board,
+      others,
       move,
-      others
     } = this.props;
     if (others.get('win')) return;
-    move(getDirection(this.start, getTouches(e)));
+    if (!board.get('transition')) {
+      move(getDirection(this.start, getTouches(e)));
+      setTimeout(() => this._transitionEnd(), 300); // TO REVIEW
+    }
   },
 
   _transitionEnd () {
     let {
       board,
       merge,
-      checkWin
+      checkWin,
+      checkLose
     } = this.props;
     if (board.get('transition')) {
       merge();
       checkWin();
+      checkLose();
     }
   }
 });
