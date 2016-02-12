@@ -1,4 +1,3 @@
-import {combineReducers} from 'redux';
 import board from './board.js';
 import others from './others.js';
 

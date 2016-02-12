@@ -18,13 +18,13 @@ let Board = React.createClass({
 
     crossvent.add(board, 'touchstart', this._touchStart, true);
     crossvent.add(board, 'touchend', this._touchEnd, true);
-    crossvent.add(container, transitionEnd(), (() => {
-      let timeout = null;
-      return () => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => this._transitionEnd());
-      };
-    })(), true);
+    // crossvent.add(container, transitionEnd(), (() => {
+    //   let timeout = null;
+    //   return () => {
+    //     clearTimeout(timeout);
+    //     timeout = setTimeout(() => this._transitionEnd());
+    //   };
+    // })(), true);
   },
 
   render () {
@@ -63,8 +63,9 @@ let Board = React.createClass({
       move,
     } = this.props;
     if (others.get('win')) return;
-    if (!board.get('transition')) {
-      move(getDirection(this.start, getTouches(e)));
+    let direction = getDirection(this.start, getTouches(e));
+    if (direction && !board.get('transition')) {
+      move(direction);
       setTimeout(() => this._transitionEnd(), 300); // TO REVIEW
     }
   },
