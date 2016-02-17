@@ -1,49 +1,29 @@
 import Immutable from 'immutable';
-import _forEach from 'lodash/forEach';
+import _keys from 'lodash/keys';
 import _some from 'lodash/some';
 import _range from 'lodash/range';
-import _random from 'lodash/random';
 import _without from 'lodash/without';
 import { generateKey } from '../helpers/index.js';
-import {
-  GRID_WIDTH,
-  GRID_HEIGHT
-} from '../constants.js';
 
 export default (state, action) => {
+  let cells;
   switch (action.type) {
     case 'NEW_GAME':
-      let {
-        height,
-        width,
-      } = action.payload;
-
-      state = refreshState();
-      return state.set('cells', randomCells(state));
-
-    case 'MERGE':
-      let state = merge(state);
-      return state.set('cells',
-        randomCells(state)
-        );
+      return randomCells(state);
 
     case 'MOVE':
       return move(state, action.payload);
 
+    case 'MERGE':
+      return randomCells({
+        ...state,
+        cells: merge(state)
+      });
+
     default:
-      return state || refreshState();
+      return state.cells || Immutable.List();
   }
 };
-
-function refreshState (width = GRID_WIDTH, height = GRID_HEIGHT) {
-  return Immutable.Map({
-    width,
-    height,
-    size: width * height,
-    win: false,
-    cells: Immutable.List()
-  });
-}
 
 function randomNumber (max = 1) {
   let random = Math.floor(Math.random() * max);
@@ -66,14 +46,13 @@ function emptyIndexs ({ width, height, size, cells }, n) {
 }
 
 function randomCells (state, n = 2) {
-  let oState = state.toObject();
   let {
     width,
     size,
     cells
-  } = oState;
+  } = state;
 
-  let newCells = emptyIndexs(oState, n)
+  let newCells = emptyIndexs(state, n)
     .map((index) => {
       let y = Math.floor(index / width);
       let x = index % width;
@@ -111,7 +90,7 @@ function availableCell (cells, coordinates) {
 }
 
 function axisOf (direction) {
-  return Object.keys(direction)[0];
+  return _keys(direction)[0];
 }
 
 function opposite (axis) {
@@ -126,18 +105,13 @@ function rangeLoop (position, max, direction) {
     : _range(position - 1, -1);
 }
 
-export function move (state, direction) {
-  let {
-    width,
-    height,
-    cells
-  } = state.toObject();
+export function move ({ width, height, cells }, direction) {
   let axis = axisOf(direction);
   let sixa = opposite(axis);
   let max = axis === 'x' ? width : height;
   let temp = cells;
 
-  cells = cells
+  return cells
     .sortBy((cell) => cell.get(axis) * -direction[axis])
     .map((cell) => {
       let oCell = cell.toObject();
@@ -176,15 +150,10 @@ export function move (state, direction) {
 
       return cell;
     });
-
-  return state
-    .set('cells', cells)
-    .set('transition', true);
 }
 
-export function merge (state) {
-  let cells = state.get('cells');
-  cells = cells
+export function merge ({ cells }) {
+  return cells
     .map(cell => {
       let to = cell.get('to');
       if (to) {
@@ -218,8 +187,4 @@ export function merge (state) {
       }));
 
     }, Immutable.List());
-
-  return state
-    .set('cells', cells)
-    .set('transition', false);
 }

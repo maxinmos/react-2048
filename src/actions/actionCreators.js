@@ -16,14 +16,9 @@ export default {
       type: 'MERGE'
     }
   },
-  checkWin: function () {
+  checkEnd: function () {
     return {
-      type: 'CHECK_WIN'
-    }
-  },
-  checkLose: function () {
-    return {
-      type: 'CHECK_LOSE'
+      type: 'CHECK_END'
     }
   }
 }
