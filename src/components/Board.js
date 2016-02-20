@@ -1,8 +1,7 @@
 import React from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import crossvent from 'crossvent';
-import { transitionEnd, getTouches, getDirection } from '../helpers/index.js';
+import Hammer from 'hammerjs';
 import Message from './Message.js';
 import Grid from './Grid.js';
 import TransitionCell from './TransitionCell.js';
@@ -12,8 +11,13 @@ import style from './Board.css';
 let Board = React.createClass({
   componentDidMount() {
     let { board } = this.refs;
-    crossvent.add(board, 'touchstart', this._touchStart, true);
-    crossvent.add(board, 'touchend', this._touchEnd, true);
+    var hammer    = new Hammer.Manager(board);
+    hammer.add(new Hammer.Swipe());
+    hammer
+      .on('swipeleft', this._move({ x: -1 }))
+      .on('swiperight', this._move({ x: 1 }))
+      .on('swipeup', this._move({ y: -1 }))
+      .on('swipedown', this._move({ y: 1 }));
   },
 
   render () {
@@ -41,22 +45,19 @@ let Board = React.createClass({
       )
   },
 
-  _touchStart (e) {
-    this.start = getTouches(e);
-  },
-
-  _touchEnd (e) {
-    let {
-      isTransition,
-      end,
-      move,
-    } = this.props;
-    if (end) return;
-    let direction = getDirection(this.start, getTouches(e));
-    if (direction && !isTransition) {
-      move(direction);
-      setTimeout(() => this._transitionEnd(), 300); // TO REVIEW
-    }
+  _move (direction) {
+    return () => {
+      let {
+        isTransition,
+        end,
+        move,
+      } = this.props;
+      if (end) return;
+      if (!isTransition) {
+        move(direction);
+        setTimeout(() => this._transitionEnd(), 300); // TO REVIEW
+      }
+    };
   },
 
   _transitionEnd () {
