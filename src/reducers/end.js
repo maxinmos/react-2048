@@ -1,7 +1,7 @@
 import Immutable from 'immutable';
 import _keys from 'lodash/keys';
 import _every from 'lodash/every';
-import { move, merge } from './cells.js';
+import { move } from './cells.js';
 import { WIN_SCORE } from '../constants.js';
 
 export default (state, action) => {
@@ -41,12 +41,8 @@ function checkLose (state) {
   if (cells.size < size) return false;
 
   let lose = _every([{ x: 1 }, { y: 1 }], (direction) => {
-    let afterMove = move(state, direction);
-    let afterMerge = merge({
-      ...state,
-      cells: afterMove
-    });
-    if (afterMerge.size >= size) return true;
+    let { hasMove } = move(state, direction);
+    if (!hasMove) return true;
   });
 
   if (lose) {

@@ -6,22 +6,22 @@ import _without from 'lodash/without';
 import { generateKey } from '../helpers/index.js';
 
 export default (state, action) => {
-  let cells;
   switch (action.type) {
     case 'NEW_GAME':
-      return randomCells(state);
+      return {
+        cells: randomCells(state)
+      };
 
     case 'MOVE':
       return move(state, action.payload);
 
     case 'MERGE':
-      return randomCells({
-        ...state,
-        cells: merge(state)
-      });
+      return state.hasMove ? {
+        cells: randomCells({...state, cells: merge(state)})
+      } : {};
 
     default:
-      return state.cells || Immutable.List();
+      return {};
   }
 };
 
@@ -49,7 +49,7 @@ function randomCells (state, n = 2) {
   let {
     width,
     size,
-    cells
+    cells = Immutable.List()
   } = state;
 
   let newCells = emptyIndexs(state, n)
@@ -110,8 +110,9 @@ export function move ({ width, height, cells }, direction) {
   let sixa = opposite(axis);
   let max = axis === 'x' ? width : height;
   let temp = cells;
+  let hasMove = false;
 
-  return cells
+  cells = cells
     .sortBy((cell) => cell.get(axis) * -direction[axis])
     .map((cell) => {
       let oCell = cell.toObject();
@@ -135,6 +136,7 @@ export function move ({ width, height, cells }, direction) {
 
       if (available) {
         let { x, y, index, value } = available;
+        hasMove = true;
         cell = cell.set('to', { x, y });
         temp = temp.delete(indexInCells(temp, oCell));
         if (~index) {
@@ -150,6 +152,11 @@ export function move ({ width, height, cells }, direction) {
 
       return cell;
     });
+
+    return {
+      cells,
+      hasMove
+    };
 }
 
 export function merge ({ cells }) {

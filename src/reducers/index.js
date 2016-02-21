@@ -24,20 +24,20 @@ export default (state = {}, action) => {
 
       return {
         ..._state,
-        cells: cells(_state, action),
+        ...cells(_state, action),
       };
 
     case 'MOVE':
       return {
         ...state,
-        cells: cells(state, action),
+        ...cells(state, action),
         isTransition: true
       };
 
     case 'MERGE':
       return {
         ...state,
-        cells: cells(state, action),
+        ...cells(state, action),
         isTransition: false
       };
 
